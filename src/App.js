@@ -13,6 +13,7 @@ const Trending     = lazy(() => import('./pages/Trending'));
 const Genres       = lazy(() => import('./pages/Genres'));
 const Actors       = lazy(() => import('./pages/Actors'));
 const Top250       = lazy(() => import('./pages/Top250'));
+const Industries    = lazy(() => import('./pages/Industries'));
 
 const Loader = () => (
   <div className="min-h-screen bg-dark-950 flex items-center justify-center">
@@ -86,6 +87,7 @@ function App() {
               <Route path="/tv-shows"   element={<TVShows />} />
               <Route path="/discover"   element={<Discover />} />
               <Route path="/anime"      element={<Anime />} />
+              <Route path="/industries" element={<Industries />} />
               <Route path="*"           element={<Home />} />
             </Routes>
           </Suspense>
