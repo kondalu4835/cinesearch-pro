@@ -172,8 +172,21 @@ const MovieDetail = () => {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl sm:text-5xl font-display tracking-wider text-white mb-2">{title.toUpperCase()}</h1>
-              {movie.tagline && <p className="text-brand-400 text-base italic mb-6">"{movie.tagline}"</p>}
+<h1 className="text-3xl sm:text-5xl font-display tracking-wider text-white mb-2">{title.toUpperCase()}</h1>
+{movie.tagline && <p className="text-brand-400 text-base italic mb-3">"{movie.tagline}"</p>}
+
+{/* Available Languages */}
+{movie.spoken_languages?.length > 0 && (
+  <div className="flex items-center gap-2 flex-wrap mb-6">
+    <span className="text-dark-500 text-xs uppercase tracking-wider mr-1">🗣️ Available in:</span>
+    {movie.spoken_languages.map(lang => (
+      <span key={lang.iso_639_1}
+        className="text-xs bg-dark-800 border border-dark-700 text-dark-200 px-3 py-1 rounded-full">
+        {lang.english_name || lang.name}
+      </span>
+    ))}
+  </div>
+)}
 
               {/* Actions */}
               <div className="flex flex-wrap gap-3 mb-8">
