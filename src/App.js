@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { WatchlistProvider } from './context/WatchlistContext';
 import Navbar from './components/Navbar';
-import { Watchlist, Movies, TVShows, Discover } from './pages/ExtraPages';
+import { Watchlist, Movies, TVShows, Discover,Anime } from './pages/ExtraPages';
 
 const Home         = lazy(() => import('./pages/Home'));
 const SearchResults= lazy(() => import('./pages/SearchResults'));
@@ -85,6 +85,7 @@ function App() {
               <Route path="/movies"     element={<Movies />} />
               <Route path="/tv-shows"   element={<TVShows />} />
               <Route path="/discover"   element={<Discover />} />
+              <Route path="/anime"      element={<Anime />} />
               <Route path="*"           element={<Home />} />
             </Routes>
           </Suspense>

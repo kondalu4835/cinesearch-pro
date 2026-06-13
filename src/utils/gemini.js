@@ -94,11 +94,16 @@ Tamil: Vijay, Ajith Kumar, Rajinikanth, Dhanush, Vikram, Suriya, Sivakarthikeyan
 Hindi: Shah Rukh Khan, Salman Khan, Aamir Khan, Hrithik Roshan, Ranveer Singh, Ranbir Kapoor, Akshay Kumar, Tiger Shroff
 Actresses: Deepika Padukone, Rashmika Mandanna, Samantha, Nayanthara, Priyanka Chopra, Alia Bhatt, Katrina Kaif, Tamannaah, Pooja Hegde, Anushka Shetty, Keerthy Suresh, Kajal Aggarwal
 Hollywood: Tom Cruise, Leonardo DiCaprio, Robert Downey Jr, Chris Evans, Chris Hemsworth, Scarlett Johansson, Dwayne Johnson, Ryan Reynolds, Will Smith, Brad Pitt
+Anime characters and shows: Naruto, One Piece, Attack on Titan, Demon Slayer,
+Jujutsu Kaisen, My Hero Academia, Dragon Ball, Death Note, Tokyo Revengers,
+Solo Leveling, Chainsaw Man, Spy x Family, One Punch Man, Bleach, Hunter x Hunter
+Western Cartoons: SpongeBob SquarePants, Tom and Jerry, Avatar The Last Airbender, Rick and Morty, The Simpsons, Family Guy, Adventure Time, Gravity Falls, Teen Titans, Ben 10, Phineas and Ferb, Regular Show, Steven Universe
 
 YOU MUST RETURN ONLY THIS EXACT JSON FORMAT — NO OTHER TEXT:
 {
   "identified": true or false,
-  "type": "person or movie or poster or scene",
+  "type": "person or movie or poster or scene or anime or unknown",
+  "anime_name": "Anime or Cartoon title if this is anime/cartoon character/scene or null",
   "person_name": "Full Actor Name if person detected else null",
   "movie_name": "Exact Movie Title if movie detected else null",
   "year": "release year or null",
@@ -157,7 +162,7 @@ export const searchByVideo = async (file) => {
       });
       console.log('📝 Frame', i + 1, 'response:', text);
       const result = parseJSON(text);
-      if (result?.identified && (result.movie_name || result.person_name)) {
+      if (result?.identified && (result.movie_name || result.person_name || result.anime_name)) {
         result.valid = true;
         return result;
       }

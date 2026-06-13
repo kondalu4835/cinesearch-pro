@@ -64,6 +64,7 @@ const Navbar = () => {
     { to: '/trending', label: 'Trending' },
     { to: '/movies', label: 'Movies' },
     { to: '/tv-shows', label: 'TV Shows' },
+    { to: '/anime',     label: 'Anime'     },
     { to: '/top250', label: 'Top 250' },
     { to: '/genres', label: 'Genres' },
     { to: '/actors', label: 'Actors' },

@@ -184,3 +184,59 @@ export const Discover = () => (
     </div>
   </div>
 );
+// ─── Anime & Cartoons ─────────────────────────────────────────────
+export const Anime = () => {
+  const [items,   setItems]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tab,     setTab]     = useState('anime');
+  const [page,    setPage]    = useState(1);
+
+  const load = (type, p = 1) => {
+    setLoading(true);
+    const params = type === 'anime'
+      ? { with_genres: 16, with_origin_country: 'JP', sort_by: 'popularity.desc', page: p }
+      : { with_genres: 16, sort_by: 'popularity.desc', page: p };
+    discoverTV(params)
+      .then(d => setItems(prev => p === 1 ? (d.results || []) : [...prev, ...(d.results || [])]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { setPage(1); load(tab, 1); }, [tab]);
+
+  const loadMore = () => { const next = page + 1; setPage(next); load(tab, next); };
+
+  return (
+    <div className="min-h-screen bg-dark-950 pt-20 pb-16">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-display tracking-wider text-white">ANIME & CARTOONS</h1>
+          <p className="text-dark-400 text-sm mt-1">Japanese anime and animated shows</p>
+        </div>
+
+        <div className="flex gap-2 mb-8">
+          {[['anime','🎌 Anime'],['cartoon','🎨 Cartoons']].map(([id, label]) => (
+            <button key={id} onClick={() => setTab(id)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                tab === id ? 'btn-primary' : 'btn-secondary'
+              }`}>{label}</button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {Array(18).fill(0).map((_, i) => <div key={i} className="skeleton rounded-xl" style={{ aspectRatio: '2/3' }} />)}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {items.map((m, i) => <MovieCard key={`${m.id}-${i}`} movie={{ ...m, media_type: 'tv' }} index={i} />)}
+            </div>
+            <div className="text-center mt-10">
+              <button onClick={loadMore} className="btn-secondary px-10 py-3">Load More</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};

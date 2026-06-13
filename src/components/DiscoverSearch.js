@@ -115,6 +115,48 @@ const DiscoverSearch = ({ compact = false }) => {
         .trim()
         .replace(/^null$/i, '')
         .replace(/^undefined$/i, '');
+      // =========================
+// ⭐ ANIME BLOCK (ONLY ADDITION)
+// =========================
+const animeName = (result?.anime_name || '')
+  .trim()
+  .replace(/^null$/i, '')
+  .replace(/^undefined$/i, '');
+
+if (animeName.length > 1) {
+  toast.loading(`🔍 Finding ${animeName}…`, { id: 'result' });
+
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/search/multi` +
+      `?api_key=${process.env.REACT_APP_TMDB_KEY}` +
+      `&query=${encodeURIComponent(animeName)}`
+    );
+
+    const data = await res.json();
+
+    const match =
+      data.results?.find(r =>
+        r.media_type === 'tv' ||
+        r.original_language === 'ja'
+      ) || data.results?.[0];
+
+    if (match?.id) {
+      const type = match.media_type === 'tv' ? 'tv' : 'movie';
+
+      toast.success(`🎌 ${animeName} found!`, { id: 'result' });
+
+      navigate(`/${type}/${match.id}`);
+      return;
+    }
+  } catch (e) {
+    console.warn('Anime search failed:', e);
+  }
+
+  toast.success(`Searching: ${animeName}`, { id: 'result' });
+  navigate(`/search?q=${encodeURIComponent(animeName)}`);
+  return;
+}
 
       // Filter valid search queries
       const badWords = ['movie','film','actor','video','scene','clip','image','photo','unknown','null'];
