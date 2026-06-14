@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getMovie, getTV, img, backdrop } from '../utils/tmdb';
 import StreamingPlatforms from '../components/StreamingPlatforms';
@@ -21,13 +21,13 @@ const Skeleton = () => (
 const MovieDetail = () => {
   const { id }       = useParams();
   const location     = useLocation();
+  const navigate     = useNavigate();
   const isTV         = location.pathname.startsWith('/tv/');
   const { toggle, isAdded } = useWatchlist();
 
   const [movie,         setMovie]         = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [showTrailer,   setShowTrailer]   = useState(false);
-  
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -61,8 +61,59 @@ const MovieDetail = () => {
   const score = movie.vote_average?.toFixed(1);
   const scoreColor = score >= 7 ? '#10b981' : score >= 5 ? '#f59e0b' : '#ef4444';
 
+  // ── Languages (merge spoken_languages + translations) ──────────
+  const langMap = new Map();
+  (movie.spoken_languages || []).forEach(l =>
+    langMap.set(l.iso_639_1, l.english_name || l.name)
+  );
+  (movie.translations?.translations || []).forEach(t => {
+    if (!langMap.has(t.iso_639_1)) {
+      langMap.set(t.iso_639_1, t.english_name || t.name);
+    }
+  });
+  const languages = Array.from(langMap.values());
+
+  // ── Release status badge ────────────────────────────────────────
+  const providers = movie['watch/providers']?.results?.IN || movie['watch/providers']?.results?.US || {};
+  const isStreaming = !!(providers.flatrate?.length || providers.free?.length);
+  const releaseDate = movie.release_date || movie.first_air_date;
+  const isFuture = releaseDate && new Date(releaseDate) > new Date();
+  const isRecent = releaseDate && !isFuture && (Date.now() - new Date(releaseDate)) < 90 * 24 * 60 * 60 * 1000;
+
+  let statusBadge = null;
+  if (isFuture) {
+    statusBadge = (
+      <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
+        🗓️ Coming Soon
+      </span>
+    );
+  } else if (isStreaming) {
+    statusBadge = (
+      <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+        ▶ Streaming Now
+      </span>
+    );
+  } else if (isRecent) {
+    statusBadge = (
+      <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-brand-500/15 text-brand-400 border border-brand-500/30">
+        🎬 In Theaters
+      </span>
+    );
+  }
+
   return (
     <div className="bg-dark-950 min-h-screen pt-16">
+
+      {/* Back button */}
+      <div className="absolute top-20 left-4 sm:left-6 lg:left-8 z-20">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 bg-dark-950/70 backdrop-blur-sm border border-white/10 text-white text-sm font-medium px-3 py-2 rounded-xl hover:bg-dark-900 transition-all"
+        >
+          ← Back
+        </button>
+      </div>
+
       {/* Backdrop hero */}
       <div className="relative h-[55vh] overflow-hidden">
         {bg ? (
@@ -171,22 +222,25 @@ const MovieDetail = () => {
                 ))}
               </div>
 
-              {/* Title */}
-<h1 className="text-3xl sm:text-5xl font-display tracking-wider text-white mb-2">{title.toUpperCase()}</h1>
-{movie.tagline && <p className="text-brand-400 text-base italic mb-3">"{movie.tagline}"</p>}
+              {/* Title + status badge */}
+              <div className="flex items-center gap-3 flex-wrap mb-2">
+                <h1 className="text-3xl sm:text-5xl font-display tracking-wider text-white">{title.toUpperCase()}</h1>
+                {statusBadge}
+              </div>
+              {movie.tagline && <p className="text-brand-400 text-base italic mb-3">"{movie.tagline}"</p>}
 
-{/* Available Languages */}
-{movie.spoken_languages?.length > 0 && (
-  <div className="flex items-center gap-2 flex-wrap mb-6">
-    <span className="text-dark-500 text-xs uppercase tracking-wider mr-1">🗣️ Available in:</span>
-    {movie.spoken_languages.map(lang => (
-      <span key={lang.iso_639_1}
-        className="text-xs bg-dark-800 border border-dark-700 text-dark-200 px-3 py-1 rounded-full">
-        {lang.english_name || lang.name}
-      </span>
-    ))}
-  </div>
-)}
+              {/* Available Languages */}
+              {languages.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap mb-6">
+                  <span className="text-dark-500 text-xs uppercase tracking-wider mr-1">🗣️ Available in:</span>
+                  {languages.map(name => (
+                    <span key={name}
+                      className="text-xs bg-dark-800 border border-dark-700 text-dark-200 px-3 py-1 rounded-full">
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex flex-wrap gap-3 mb-8">

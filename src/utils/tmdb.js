@@ -19,12 +19,11 @@ export const searchPeople  = (q)                  => api.get('/search/person',  
 export const searchTV      = (q)                  => api.get('/search/tv',      { params: { query: q, include_adult: false } }).then(r => r.data);
 
 // ── Movie ─────────────────────────────────────────────────────────
-export const getMovie        = (id) => api.get(`/movie/${id}`, { params: { append_to_response: 'credits,videos,similar,recommendations,watch/providers,images,keywords,reviews,release_dates' } }).then(r => r.data);
+export const getMovie = (id) => api.get(`/movie/${id}`, { params: { append_to_response: 'credits,videos,similar,recommendations,watch/providers,images,keywords,reviews,release_dates,translations' } }).then(r => r.data);
 export const getMovieProviders = (id) => api.get(`/movie/${id}/watch/providers`).then(r => r.data);
 
 // ── TV ────────────────────────────────────────────────────────────
-export const getTV = (id) => api.get(`/tv/${id}`, { params: { append_to_response: 'credits,videos,similar,recommendations,watch/providers,images,keywords,reviews' } }).then(r => r.data);
-
+export const getTV = (id) => api.get(`/tv/${id}`, { params: { append_to_response: 'credits,videos,similar,recommendations,watch/providers,images,keywords,reviews,translations' } }).then(r => r.data);
 // ── Person ────────────────────────────────────────────────────────
 export const getPerson = (id) => api.get(`/person/${id}`, { params: { append_to_response: 'movie_credits,tv_credits,images,external_ids' } }).then(r => r.data);
 

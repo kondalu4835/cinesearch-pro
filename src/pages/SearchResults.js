@@ -74,11 +74,20 @@ const SearchResults = () => {
           .filter(r => r.poster_path || r.backdrop_path)
           .filter(r => !r.vote_count || r.vote_count > 3)
           .sort((a, b) => {
-            const aMatch = (a.title || a.name || '').toLowerCase() === q.toLowerCase();
-            const bMatch = (b.title || b.name || '').toLowerCase() === q.toLowerCase();
+            const aTitle = (a.title || a.name || '').toLowerCase();
+            const bTitle = (b.title || b.name || '').toLowerCase();
+            const aMatch = aTitle === q.toLowerCase();
+            const bMatch = bTitle === q.toLowerCase();
             if (aMatch && !bMatch) return -1;
             if (!aMatch && bMatch) return 1;
-            return (b.popularity || 0) - (a.popularity || 0);
+
+            const popDiff = (b.popularity || 0) - (a.popularity || 0);
+            if (Math.abs(popDiff) < 5) {
+              const aYear = (a.release_date || a.first_air_date || '0').slice(0, 4);
+              const bYear = (b.release_date || b.first_air_date || '0').slice(0, 4);
+              return bYear.localeCompare(aYear);
+            }
+            return popDiff;
           });
 
         const personResults = (people.results || []).filter(p => p.profile_path);

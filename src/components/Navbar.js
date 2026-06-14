@@ -11,10 +11,12 @@ const Navbar = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading]         = useState(false);
   const [menuOpen, setMenuOpen]       = useState(false);
+  const [moreOpen, setMoreOpen]       = useState(false);
   const navigate  = useNavigate();
   const location  = useLocation();
   const timerRef  = useRef(null);
   const inputRef  = useRef(null);
+  const moreRef   = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -24,10 +26,20 @@ const Navbar = () => {
 
   // close menu on route change
   useEffect(() => {
-  setMenuOpen(false);
-  setQuery('');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [location.pathname]);
+    setMenuOpen(false);
+    setQuery('');
+    setMoreOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // close "More" dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // debounced suggestions
   useEffect(() => {
@@ -60,16 +72,19 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/trending', label: 'Trending' },
+    { to: '/',           label: 'Home'       },
+    { to: '/trending',   label: 'Trending'   },
     { to: '/industries', label: 'Industries' },
-    { to: '/movies', label: 'Movies' },
-    { to: '/tv-shows', label: 'TV Shows' },
-    { to: '/anime',     label: 'Anime'     },
-    { to: '/top250', label: 'Top 250' },
-    { to: '/genres', label: 'Genres' },
-    { to: '/actors', label: 'Actors' },
-    { to: '/watchlist', label: 'Watchlist' },
+    { to: '/movies',     label: 'Movies'     },
+    { to: '/tv-shows',   label: 'TV Shows'   },
+    { to: '/watchlist',  label: 'Watchlist'  },
+  ];
+
+  const moreLinks = [
+    { to: '/anime',    label: '🎌 Anime'   },
+    { to: '/top250',   label: '🏆 Top 250' },
+    { to: '/genres',   label: '🎭 Genres'  },
+    { to: '/actors',   label: '⭐ Actors'  },
   ];
 
   return (
@@ -102,6 +117,37 @@ const Navbar = () => {
                 {l.label}
               </Link>
             ))}
+
+            {/* More dropdown */}
+            <div className="relative" ref={moreRef}>
+              <button
+                onClick={() => setMoreOpen(v => !v)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1 ${
+                  moreLinks.some(l => l.to === location.pathname)
+                    ? 'text-brand-400 bg-brand-400/10'
+                    : 'text-dark-300 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                More
+                <svg className={`w-3.5 h-3.5 transition-transform ${moreOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {moreOpen && (
+                <div className="absolute top-full left-0 mt-2 bg-dark-900 border border-dark-700 rounded-xl overflow-hidden shadow-2xl z-50 min-w-[160px]">
+                  {moreLinks.map(l => (
+                    <Link key={l.to} to={l.to} onClick={() => setMoreOpen(false)}
+                      className={`block px-4 py-2.5 text-sm font-medium transition-colors ${
+                        location.pathname === l.to
+                          ? 'text-brand-400 bg-brand-400/10'
+                          : 'text-dark-300 hover:text-white hover:bg-white/5'
+                      }`}>
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* Search bar */}
@@ -212,7 +258,7 @@ const Navbar = () => {
               exit={{ opacity: 0, height: 0 }}
               className="lg:hidden border-t border-dark-800 py-3 overflow-hidden"
             >
-              {navLinks.map(l => (
+              {[...navLinks, ...moreLinks].map(l => (
                 <Link
                   key={l.to}
                   to={l.to}

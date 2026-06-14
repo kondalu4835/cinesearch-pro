@@ -9,6 +9,13 @@ import DiscoverSearch from '../components/DiscoverSearch';
 // ─── Watchlist ────────────────────────────────────────────────────
 export const Watchlist = () => {
   const { watchlist, toggle } = useWatchlist();
+  const [filter, setFilter] = useState('all');
+
+  const filtered = watchlist.filter(item => {
+    if (filter === 'all') return true;
+    if (filter === 'movie') return (item.type || 'movie') === 'movie';
+    return (item.type || 'movie') === 'tv';
+  });
 
   return (
     <div className="min-h-screen bg-dark-950 pt-20 pb-16">
@@ -24,16 +31,31 @@ export const Watchlist = () => {
           )}
         </div>
 
-        {watchlist.length === 0 ? (
+        {watchlist.length > 0 && (
+          <div className="flex gap-2 mb-6">
+            {[['all','All'],['movie','🎬 Movies'],['tv','📺 TV & Anime']].map(([id, label]) => (
+              <button key={id} onClick={() => setFilter(id)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                  filter === id ? 'btn-primary' : 'btn-secondary'
+                }`}>{label}</button>
+            ))}
+          </div>
+        )}
+
+        {filtered.length === 0 ? (
           <div className="text-center py-32">
             <p className="text-6xl mb-5">🎬</p>
-            <h3 className="text-xl font-bold text-white mb-2">Your watchlist is empty</h3>
-            <p className="text-dark-500 text-sm mb-8">Add movies and shows you want to watch later</p>
+            <h3 className="text-xl font-bold text-white mb-2">
+              {watchlist.length === 0 ? 'Your watchlist is empty' : 'No items in this filter'}
+            </h3>
+            <p className="text-dark-500 text-sm mb-8">
+              {watchlist.length === 0 ? 'Add movies and shows you want to watch later' : 'Try a different filter'}
+            </p>
             <Link to="/" className="btn-primary">Browse Movies</Link>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {watchlist.map((item, i) => (
+            {filtered.map((item, i) => (
               <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
                 <Link to={`/${item.type || 'movie'}/${item.id}`}>
                   <div className="group relative card overflow-hidden hover:border-dark-600 hover:-translate-y-1 transition-all duration-300 cursor-pointer" style={{ aspectRatio: '2/3' }}>
@@ -184,6 +206,7 @@ export const Discover = () => (
     </div>
   </div>
 );
+
 // ─── Anime & Cartoons ─────────────────────────────────────────────
 export const Anime = () => {
   const [items,   setItems]   = useState([]);
