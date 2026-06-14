@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { discover, discoverTV } from '../utils/tmdb';
 import { INDUSTRIES } from '../utils/industries';
 import MovieCard from '../components/MovieCard';
+import ErrorState from '../components/ErrorState';
 
 const Industries = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,15 +12,18 @@ const Industries = () => {
   const [active, setActive] = useState(initial);
   const [items,  setItems]  = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
 
   const industry = INDUSTRIES.find(i => i.id === active) || INDUSTRIES[0];
 
   const load = (ind, p = 1) => {
     setLoading(true);
+    setError(false);
     const fetcher = ind.type === 'tv' ? discoverTV : discover;
     fetcher({ ...ind.params, page: p })
       .then(d => setItems(prev => p === 1 ? (d.results || []) : [...prev, ...(d.results || [])]))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   };
 
@@ -90,7 +94,9 @@ const Industries = () => {
         </motion.div>
 
         {/* Grid */}
-        {loading ? (
+        {error ? (
+          <ErrorState message={`Couldn't load ${industry.label}`} onRetry={() => load(industry, 1)} />
+        ) : loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {Array(18).fill(0).map((_, i) => <div key={i} className="skeleton rounded-xl" style={{ aspectRatio: '2/3' }} />)}
           </div>

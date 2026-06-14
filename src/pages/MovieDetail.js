@@ -29,15 +29,32 @@ const MovieDetail = () => {
   const [loading,       setLoading]       = useState(true);
   const [showTrailer,   setShowTrailer]   = useState(false);
 
-  useEffect(() => {
+  const [error, setError] = useState(false);
+
+  const load = () => {
     window.scrollTo(0, 0);
     setLoading(true);
+    setError(false);
     setMovie(null);
     const fn = isTV ? getTV : getMovie;
-    fn(id).then(setMovie).catch(console.error).finally(() => setLoading(false));
-  }, [id, isTV]);
+    fn(id).then(setMovie).catch(() => setError(true)).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, [id, isTV]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <Skeleton />;
+
+  if (error) return (
+    <div className="min-h-screen bg-dark-950 flex items-center justify-center pt-16">
+      <div className="text-center">
+        <p className="text-5xl mb-4">📡</p>
+        <h2 className="text-xl font-bold text-white mb-2">Couldn't load this page</h2>
+        <p className="text-dark-500 text-sm mb-6">Check your connection and try again</p>
+        <button onClick={load} className="btn-primary">🔄 Retry</button>
+      </div>
+    </div>
+  );
+
   if (!movie) return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center pt-16">
       <div className="text-center">

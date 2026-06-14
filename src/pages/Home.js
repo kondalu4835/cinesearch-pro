@@ -5,6 +5,7 @@ import { getTrending, getNowPlaying, getTopRated, getUpcoming, discover, discove
 import { INDUSTRIES } from '../utils/industries';
 import MovieRow from '../components/MovieRow';
 import DiscoverSearch from '../components/DiscoverSearch';
+import ErrorState from '../components/ErrorState';
 
 const HeroBanner = ({ movie }) => {
   if (!movie) return null;
@@ -82,9 +83,12 @@ const Home = () => {
   const [upcoming,   setUpcoming]   = useState([]);
   const [industryRows, setIndustryRows] = useState({});
   const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
+  const load = () => {
+    setLoading(true);
+    setError(false);
+    (async () => {
       try {
         const [t, n, top, u] = await Promise.all([
           getTrending('movie', 'week'),
@@ -105,11 +109,22 @@ const Home = () => {
         const map = {};
         keyIndustries.forEach((ind, idx) => { map[ind.id] = results[idx].results || []; });
         setIndustryRows(map);
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
-    };
-    load();
-  }, []);
+      } catch (e) {
+        console.error(e);
+        setError(true);
+      } finally { setLoading(false); }
+    })();
+  };
+
+  useEffect(() => { load(); }, []);
+
+  if (error) {
+    return (
+      <div className="bg-dark-950 min-h-screen pt-20">
+        <ErrorState message="Couldn't load movies" onRetry={load} />
+      </div>
+    );
+  }
 
   const hero = trending[0];
 
